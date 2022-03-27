@@ -8,7 +8,7 @@ import java.awt.event.MouseEvent;
 public class Board extends JComponent implements MouseInputListener, ComponentListener {
     private static final long serialVersionUID = 1L;
     private Point[][] points;
-    private int size = 10;
+    private int size = 25;
     public int editType = 0;
 
     public Board(int length, int height) {
@@ -29,10 +29,29 @@ public class Board extends JComponent implements MouseInputListener, ComponentLi
         }
         for (int x = 0; x < points.length; ++x) {
             for (int y = 0; y < points[x].length; ++y) {
-                if (x< points.length-1)
-                    points[x][y].next = points[x+1][y];
-                else
+                if (x == points.length-1) {
                     points[x][y].next = points[0][y];
+                    points[x][y].prev = points[x - 1][y];
+                }
+                else if (x==0) {
+                    points[x][y].next = points[x + 1][y];
+                    points[x][y].prev = points[points.length - 1][y];
+                }
+                else {
+                    points[x][y].next = points[x + 1][y];
+                    points[x][y].prev = points[x - 1][y];
+                }
+                if (y<2  || y>3){
+                    points[x][y].setType(5);
+                }
+                if (y==2){
+                    points[x][y].leftBelt=true;
+                    points[x][y].rightBeltPoint=points[x][3];
+                }
+                if (y==3){
+                    points[x][y].rightBelt=true;
+                    points[x][y].leftBeltPoint=points[x][2];
+                }
             }
         }
     }
@@ -53,10 +72,13 @@ public class Board extends JComponent implements MouseInputListener, ComponentLi
     }
 
     public void clear() {
-        for (int x = 0; x < points.length; ++x)
+        /*for (int x = 0; x < points.length; ++x)
             for (int y = 0; y < points[x].length; ++y) {
                 points[x][y].clear();
-            }
+            }*/
+        int dlugosc = (this.getWidth() / size) + 1;
+        int wysokosc = 6; //= (this.getHeight() / size) + 1;
+        initialize(dlugosc, wysokosc);
         this.repaint();
     }
 
@@ -92,10 +114,16 @@ public class Board extends JComponent implements MouseInputListener, ComponentLi
         for (x = 0; x < points.length; ++x) {
             for (y = 0; y < points[x].length; ++y) {
                 float a = 1.0F;
-                if (points[x][y].type==0)
-                    g.setColor(new Color(0.0f, 0.0f, 0.0f, 1.0f));
-                if (points[x][y].type==1)
+                if (points[x][y].getType()==0)
                     g.setColor(new Color(1.0f, 1.0f, 1.0f, 1.0f));
+                if (points[x][y].getType()==1)
+                    g.setColor(new Color(1.0f, 0.5f, 0.0f, 1.0f));
+                if (points[x][y].getType()==2)
+                    g.setColor(new Color(0.0f, 0.0f, 1.0f, 1.0f));
+                if (points[x][y].getType()==3)
+                    g.setColor(new Color(1.0f, 0.0f, 0.0f, 1.0f));
+                if (points[x][y].getType()==5)
+                    g.setColor(new Color(0.0f, 1.0f, 0.0f, 1.0f));
 
                 g.fillRect((x * size) + 1, (y * size) + 1, (size - 1), (size - 1));
             }
@@ -107,8 +135,11 @@ public class Board extends JComponent implements MouseInputListener, ComponentLi
         int x = e.getX() / size;
         int y = e.getY() / size;
         if ((x < points.length) && (x > 0) && (y < points[x].length) && (y > 0)) {
-            if (editType == 0) {
+            if(editType==0){
                 points[x][y].clicked();
+            }
+            else {
+                points[x][y].setType(editType);
             }
             this.repaint();
         }
@@ -116,7 +147,7 @@ public class Board extends JComponent implements MouseInputListener, ComponentLi
 
     public void componentResized(ComponentEvent e) {
         int dlugosc = (this.getWidth() / size) + 1;
-        int wysokosc = (this.getHeight() / size) + 1;
+        int wysokosc = 6; //= (this.getHeight() / size) + 1;
         initialize(dlugosc, wysokosc);
     }
 
@@ -124,8 +155,11 @@ public class Board extends JComponent implements MouseInputListener, ComponentLi
         int x = e.getX() / size;
         int y = e.getY() / size;
         if ((x < points.length) && (x > 0) && (y < points[x].length) && (y > 0)) {
-            if (editType == 0) {
+            if(editType==0){
                 points[x][y].clicked();
+            }
+            else {
+                points[x][y].setType(editType);
             }
             this.repaint();
         }
